@@ -1,10 +1,10 @@
-import * as core from '@actions/core'
+import {setFailed, info, addPath, getInput} from '@actions/core'
 import {downloadRelease} from '@terascope/fetch-github-release'
 import {exec} from 'child_process'
 
 const isWin = process.platform === 'win32'
 
-const tag: string = core.getInput('version')
+const tag: string = getInput('version')
 
 async function run(): Promise<void> {
   await downloadRelease(
@@ -26,15 +26,15 @@ async function run(): Promise<void> {
   if (!isWin) {
     exec('chmod +x hemtt/hemtt', (error, stdout, stderr) => {
       if (error) {
-        core.setFailed(error.message)
+        setFailed(error.message)
       }
       if (stderr) {
-        core.setFailed(stderr)
+        setFailed(stderr)
       }
-      core.info(stdout)
+      info(stdout)
     })
   }
-  core.addPath(`${process.cwd()}/hemtt`)
+  addPath(`${process.cwd()}/hemtt`)
 }
 
 run()

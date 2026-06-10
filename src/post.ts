@@ -1,31 +1,32 @@
-import * as core from '@actions/core'
-import * as fs from 'fs'
+import {getInput, info, error, warning, notice} from '@actions/core'
+import type {AnnotationProperties} from '@actions/core'
+import {existsSync, readFileSync} from 'fs'
 
-const annotate: boolean = core.getInput('annotate') !== 'false'
+const annotate: boolean = getInput('annotate') !== 'false'
 
 const file = '.hemttout/ci_annotations.txt'
 
 function run(): void {
   if (!annotate) return
-  core.info('Annotating build.')
-  if (!fs.existsSync(file)) {
-    core.info('No annotations file found.')
+  info('Annotating build.')
+  if (!existsSync(file)) {
+    info('No annotations file found.')
     return
   }
-  const data = fs.readFileSync(file, 'utf8')
+  const data = readFileSync(file, 'utf8')
   const lines = data.split('\n')
   const annotations = lines.filter(line => line.length > 0).map(parseAnnotation)
-  core.info(`Found ${annotations.length} annotations.`)
+  info(`Found ${annotations.length} annotations.`)
   for (const annotation of annotations) {
     switch (annotation.level) {
       case 'error':
-        core.error(annotation.message, annotationParams(annotation))
+        error(annotation.message, annotationParams(annotation))
         break
       case 'warning':
-        core.warning(annotation.message, annotationParams(annotation))
+        warning(annotation.message, annotationParams(annotation))
         break
       default:
-        core.notice(annotation.message, annotationParams(annotation))
+        notice(annotation.message, annotationParams(annotation))
         break
     }
   }
@@ -56,8 +57,8 @@ function parseAnnotation(line: string): Annotation {
   }
 }
 
-function annotationParams(annotation: Annotation): core.AnnotationProperties {
-  const props: core.AnnotationProperties = {
+function annotationParams(annotation: Annotation): AnnotationProperties {
+  const props: AnnotationProperties = {
     file: annotation.path,
     title: annotation.title,
     startLine: annotation.start_line,
